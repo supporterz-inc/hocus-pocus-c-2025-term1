@@ -140,3 +140,5 @@ vite.config.ts.timestamp-*
 
 # Project specific ignores
 target/
+FileBasedKnowledgeRepository_IMPLEMENTATION_GUIDE.md
+IMPLEMENTATION_PLAN.md
