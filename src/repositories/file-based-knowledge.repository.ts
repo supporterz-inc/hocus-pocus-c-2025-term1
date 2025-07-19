@@ -1,7 +1,9 @@
-/*
+
 import { promises as fs } from 'node:fs';
 import { join } from 'node:path';
 import type { Knowledge } from '../core-domain/knowledge.model.js';
+import { writeFile, unlink } from "fs/promises";
+import * as path from "path";
 import type { KnowledgeRepository } from './knowledge.repository.js';
 
 const STORAGE_DIR = './storage';
@@ -87,7 +89,17 @@ export const FileBasedKnowledgeRepository: KnowledgeRepository = {
 
 
   // @ts-ignore TODO: (学生向け) 実装する
-  upsert: async (knowledge) => {},
+  upsert: async (knowledge) => {
+    const filepath = path.join(
+      __dirname,
+      `strage/knowledge-${knowledge.id}.json`
+    );
+    const content = `${knowledge}`;
+    await writeFile(filepath, content, "utf-8");
+  },
   // @ts-ignore TODO: (学生向け) 実装する
-  deleteById: async (id) => {},
+  deleteById: async (id) => {
+    const filepath = path.join(__dirname, `strage/knowledge-${id}.json`);
+    await unlink(filepath);
+  },
 };
