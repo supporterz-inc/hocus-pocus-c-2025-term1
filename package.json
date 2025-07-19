@@ -1,0 +1,29 @@
+{
+  "author": "Supporterz, Inc.",
+  "description": "Hocus Pocus | Knowledge Sharing Platform for GEEK-Project",
+  "license": "UNLICENSED",
+  "name": "hocus-pocus",
+  "private": true,
+  "scripts": {
+    "build:ts": "tsc",
+    "build:css": "tailwindcss -c ./src/ia-domain/tailwind.config.ts --content './target/**/*.js' -i ./src/ia-domain/tailwind.index.css -o ./target/index.css",
+    "build": "npm run build:ts && npm run build:css",
+    "start": "node ./target/index.js",
+    "test": "vitest run",
+    "check": "biome check --write ./src"
+  },
+  "type": "module",
+  "version": "0.0.0",
+  "dependencies": {
+    "@hono/node-server": "^1.16.0",
+    "hono": "^4.8.5"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^2.1.2",
+    "@tailwindcss/cli": "^4.1.11",
+    "@types/node": "^24.0.14",
+    "tailwindcss": "^4.1.11",
+    "typescript": "^5.8.3",
+    "vitest": "^3.2.4"
+  }
+}
