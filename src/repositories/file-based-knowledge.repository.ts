@@ -41,7 +41,6 @@ async function writeSingleKnowledge(knowledge: Knowledge): Promise<void> {
   const filePath = getKnowledgeFilePath(knowledge.id);
   await fs.writeFile(filePath, JSON.stringify(knowledge, null, 2));
 }
-*/
 
 // getAll: storage/フォルダの全.jsonファイルを読んで配列で返す
 // getById: storage/knowledge-{id}.json を読んで1つ返す
