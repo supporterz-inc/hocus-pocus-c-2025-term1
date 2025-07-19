@@ -53,8 +53,21 @@ describe('FileBasedKnowledgeRepository', () => {
         }
     });
 
-    it('should save and retrieve knowledge', async () => {
-        // TODO: Person AとBができたら実装
-        expect(true).toBe(true);
+    it('ナレッジの保存と取得', async () => {
+        // テスト用のナレッジを作成
+        const knowledge = Knowledge.create("テスト投稿です", "testUser");
+
+        // ナレッジを保存
+        await FileBasedKnowledgeRepository.upsert(knowledge);
+
+        // 取得
+        const retrieved = await FileBasedKnowledgeRepository.getById(knowledge.id);
+
+        // 確認
+        expect(retrieved.id).toBe(knowledge.id);
+        expect(retrieved.content).toBe("テスト投稿です");
+        expect(retrieved.authorId).toBe("testUser");
+        expect(retrieved.createdAt).toBe(knowledge.createdAt);
+        expect(retrieved.updatedAt).toBe(knowledge.updatedAt);
     });
 });
