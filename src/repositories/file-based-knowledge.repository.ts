@@ -86,8 +86,10 @@ export const FileBasedKnowledgeRepository: KnowledgeRepository = {
     }
   },
 
+
   async upsert(knowledge: Knowledge): Promise<void> {
     await writeSingleKnowledge(knowledge);
+
   },
 
   async deleteById(id: string): Promise<void> {
