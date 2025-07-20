@@ -1,4 +1,3 @@
-
 import { promises as fs } from 'node:fs';
 import { join } from 'node:path';
 import type { Knowledge } from '../core-domain/knowledge.model.js';
@@ -66,8 +65,8 @@ export const FileBasedKnowledgeRepository: KnowledgeRepository = {
     try {
       await ensureStorageDir();
       const files = await fs.readdir(STORAGE_DIR);
-      const knowledgeFiles = files.filter(file => file.startsWith('knowledge-') && file.endsWith('.json'));
-      
+      const knowledgeFiles = files.filter((file) => file.startsWith('knowledge-') && file.endsWith('.json'));
+
       const knowledgeList: Knowledge[] = [];
       for (const file of knowledgeFiles) {
         try {
@@ -79,13 +78,12 @@ export const FileBasedKnowledgeRepository: KnowledgeRepository = {
           // ファイル読み込みエラーは無視して続行
         }
       }
-      
+
       return knowledgeList.sort((a, b) => b.updatedAt - a.updatedAt);
     } catch {
       return [];
     }
   },
-
 
   // @ts-ignore TODO: (学生向け) 実装する
   upsert: async (knowledge) => {
