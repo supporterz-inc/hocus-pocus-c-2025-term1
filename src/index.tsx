@@ -3,10 +3,11 @@ import { serveStatic } from '@hono/node-server/serve-static';
 import { Hono } from 'hono';
 import { HTTPException } from 'hono/http-exception';
 import { trimTrailingSlash } from 'hono/trailing-slash';
+import { Knowledge } from './core-domain/knowledge.model.js';
+import { FileBasedKnowledgeRepository } from './repositories/file-based-knowledge.repository.js';
 import { verifyIapJwt } from './services/jwt.service.js';
 import { Layout } from './ux-domain/Layout.js';
-import { FileBasedKnowledgeRepository } from './repositories/file-based-knowledge.repository.js';
-import { Knowledge } from './core-domain/knowledge.model.js';
+import { KnowledgeDetail } from './ux-domain/KnowledgeDetail.js';
 
 const app = new Hono();
 // biome-ignore lint/complexity/useLiteralKeys: tsc の挙動と一貫性を保つため
@@ -49,6 +50,17 @@ app.get('/knowledge/:id', async (c) => {
     return c.json(knowledge);
   } catch (error) {
     return c.json({ error: 'Knowledge not found' }, 404);
+  }
+});
+
+// 詳細画面表示
+app.get('/knowledge/:id/view', async (c) => {
+  try {
+    const id = c.req.param('id');
+    const knowledge = await FileBasedKnowledgeRepository.getById(id);
+    return c.html(<KnowledgeDetail knowledge={knowledge} />);
+  } catch (error) {
+    return c.html(<KnowledgeDetail />); // エラー時は空の状態
   }
 });
 
