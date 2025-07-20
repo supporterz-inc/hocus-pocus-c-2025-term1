@@ -142,3 +142,5 @@ vite.config.ts.timestamp-*
 target/
 FileBasedKnowledgeRepository_IMPLEMENTATION_GUIDE.md
 IMPLEMENTATION_PLAN.md
+CLAUDE.md
+src/index.tsx
