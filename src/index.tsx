@@ -5,6 +5,8 @@ import { HTTPException } from 'hono/http-exception';
 import { trimTrailingSlash } from 'hono/trailing-slash';
 import { verifyIapJwt } from './services/jwt.service.js';
 import { Layout } from './ux-domain/Layout.js';
+import { FileBasedKnowledgeRepository } from './repositories/file-based-knowledge.repository.js';
+import { Knowledge } from './core-domain/knowledge.model.js';
 
 const app = new Hono();
 // biome-ignore lint/complexity/useLiteralKeys: tsc の挙動と一貫性を保つため
@@ -29,6 +31,59 @@ app.use('*', async (ctx, next) => {
 
 app.get('/', (ctx) => {
   return ctx.html(<Layout />);
+});
+
+app.get('/knowledge', async (c) => {
+  try {
+    const knowledgeList = await FileBasedKnowledgeRepository.getAll();
+    return c.json(knowledgeList);
+  } catch (error) {
+    return c.json({ error: 'Failed to get knowledge list' }, 500);
+  }
+});
+
+app.get('/knowledge/:id', async (c) => {
+  try {
+    const id = c.req.param('id');
+    const knowledge = await FileBasedKnowledgeRepository.getById(id);
+    return c.json(knowledge);
+  } catch (error) {
+    return c.json({ error: 'Knowledge not found' }, 404);
+  }
+});
+
+app.post('/knowledge', async (c) => {
+  try {
+    const body = await c.req.json();
+    const knowledge = Knowledge.create(body.content, body.authorId);
+    await FileBasedKnowledgeRepository.upsert(knowledge);
+    return c.json(knowledge, 201);
+  } catch (error) {
+    return c.json({ error: 'Failed to create knowledge' }, 400);
+  }
+});
+
+app.put('/knowledge/:id', async (c) => {
+  try {
+    const id = c.req.param('id');
+    const body = await c.req.json();
+    const existing = await FileBasedKnowledgeRepository.getById(id);
+    const updated = Knowledge.update(existing, body.content);
+    await FileBasedKnowledgeRepository.upsert(updated);
+    return c.json(updated);
+  } catch (error) {
+    return c.json({ error: 'Failed to update knowledge' }, 400);
+  }
+});
+
+app.delete('/knowledge/:id', async (c) => {
+  try {
+    const id = c.req.param('id');
+    await FileBasedKnowledgeRepository.deleteById(id);
+    return c.json({ success: true });
+  } catch (error) {
+    return c.json({ error: 'Failed to delete knowledge' }, 400);
+  }
 });
 
 const server = serve({

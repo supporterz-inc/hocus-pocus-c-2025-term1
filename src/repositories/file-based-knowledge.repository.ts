@@ -2,8 +2,8 @@
 import { promises as fs } from 'node:fs';
 import { join } from 'node:path';
 import type { Knowledge } from '../core-domain/knowledge.model.js';
-import { writeFile, unlink } from "fs/promises";
-import * as path from "path";
+// import { writeFile, unlink } from "fs/promises";
+// import * as path from "path";
 import type { KnowledgeRepository } from './knowledge.repository.js';
 
 const STORAGE_DIR = './storage';
@@ -36,11 +36,11 @@ async function readSingleKnowledge(id: string): Promise<Knowledge | null> {
 // 単一のナレッジデータを個別JSONファイルに書き込み
 // ナレッジのIDを使ってファイル名を決定
 // インデント付きで整形して保存
-async function writeSingleKnowledge(knowledge: Knowledge): Promise<void> {
-  await ensureStorageDir();
-  const filePath = getKnowledgeFilePath(knowledge.id);
-  await fs.writeFile(filePath, JSON.stringify(knowledge, null, 2));
-}
+// async function writeSingleKnowledge(knowledge: Knowledge): Promise<void> {
+//   await ensureStorageDir();
+//   const filePath = getKnowledgeFilePath(knowledge.id);
+//   await fs.writeFile(filePath, JSON.stringify(knowledge, null, 2));
+// }
 
 // getAll: storage/フォルダの全.jsonファイルを読んで配列で返す
 // getById: storage/knowledge-{id}.json を読んで1つ返す
