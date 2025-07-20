@@ -1,4 +1,4 @@
-export function Layout({ children }: { children?: React.ReactNode }) {
+export function Layout({ children }: { children?: any }) {
   return (
     <html lang="ja">
       <head>

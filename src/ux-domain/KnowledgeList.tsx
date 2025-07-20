@@ -20,7 +20,7 @@ function formatRelativeTime(timestamp: number): string {
     return date.toLocaleDateString('ja-JP', {
       year: 'numeric',
       month: 'short',
-      day: 'numeric'
+      day: 'numeric',
     });
   }
 }
@@ -32,7 +32,7 @@ function formatDateTime(timestamp: number): string {
     month: '2-digit',
     day: '2-digit',
     hour: '2-digit',
-    minute: '2-digit'
+    minute: '2-digit',
   });
 }
 
@@ -54,9 +54,9 @@ export function KnowledgeList({ knowledgeList = [], error }: KnowledgeListProps)
     return (
       <div class="text-center py-xl">
         <p class="text-gray-500 text-16">まだナレッジが投稿されていません</p>
-        <a 
-          href="/knowledge/new" 
+        <a
           class="inline-block mt-m px-m py-s bg-blue-500 text-white rounded-md text-14 hover:bg-blue-600 transition-colors"
+          href="/knowledge/new"
         >
           最初のナレッジを投稿する
         </a>
@@ -67,60 +67,61 @@ export function KnowledgeList({ knowledgeList = [], error }: KnowledgeListProps)
   return (
     <div class="space-y-s">
       <div class="flex justify-between items-center mb-m">
-        <h2 class="text-18 font-semibold text-gray-900">
-          ナレッジ一覧 ({knowledgeList.length}件)
-        </h2>
-        <a 
-          href="/knowledge/new" 
+        <h2 class="text-18 font-semibold text-gray-900">ナレッジ一覧 ({knowledgeList.length}件)</h2>
+        <a
           class="px-s py-xs bg-blue-500 text-white rounded-md text-14 hover:bg-blue-600 transition-colors"
+          href="/knowledge/new"
         >
           新規投稿
         </a>
       </div>
-      
+
       {knowledgeList.map((knowledge) => (
-        <div key={knowledge.id} class="bg-white border border-gray-200 rounded-md p-m hover:shadow-sm transition-shadow">
+        <div
+          class="bg-white border border-gray-200 rounded-md p-m hover:shadow-sm transition-shadow"
+          key={knowledge.id}
+        >
           <div class="flex justify-between items-start mb-xs">
             <div class="flex flex-col">
-              <span class="text-12 text-gray-500">
-                {formatRelativeTime(knowledge.updatedAt)}
-              </span>
+              <span class="text-12 text-gray-500">{formatRelativeTime(knowledge.updatedAt)}</span>
               <span class="text-10 text-gray-400" title={formatDateTime(knowledge.updatedAt)}>
                 {formatDateTime(knowledge.updatedAt)}
               </span>
             </div>
-            <span class="text-12 text-gray-500">
-              by {knowledge.authorId}
-            </span>
+            <span class="text-12 text-gray-500">by {knowledge.authorId}</span>
           </div>
-          
+
           <div class="mb-s">
             <p class="text-gray-700 text-14 line-clamp-3">
               {knowledge.content.slice(0, 150)}
               {knowledge.content.length > 150 ? '...' : ''}
             </p>
           </div>
-          
+
           <div class="flex justify-between items-center">
-            <a 
-              href={`/knowledge/${knowledge.id}/view`}
+            <a
               class="text-blue-500 text-14 hover:text-blue-700 transition-colors"
+              href={`/knowledge/${knowledge.id}/view`}
             >
               詳細を見る →
             </a>
             <div class="flex gap-xs">
-              <a 
-                href={`/knowledge/${knowledge.id}/edit`}
+              <a
                 class="text-gray-500 text-12 hover:text-gray-700 transition-colors"
+                href={`/knowledge/${knowledge.id}/edit`}
               >
                 編集
               </a>
-              <button 
-                onclick={`deleteKnowledge('${knowledge.id}')`}
-                class="text-red-500 text-12 hover:text-red-700 transition-colors"
-              >
-                削除
-              </button>
+              <form method="post" action={`/api/knowledge/${knowledge.id}`} style="display: inline;">
+                <input type="hidden" name="_method" value="DELETE" />
+                <button
+                  type="submit"
+                  class="text-red-500 text-12 hover:text-red-700 transition-colors"
+                  onclick="return confirm('このナレッジを削除してもよろしいですか？')"
+                >
+                  削除
+                </button>
+              </form>
             </div>
           </div>
         </div>
