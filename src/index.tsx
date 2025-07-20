@@ -6,8 +6,9 @@ import { trimTrailingSlash } from 'hono/trailing-slash';
 import { Knowledge } from './core-domain/knowledge.model.js';
 import { FileBasedKnowledgeRepository } from './repositories/file-based-knowledge.repository.js';
 import { verifyIapJwt } from './services/jwt.service.js';
-import { Layout } from './ux-domain/Layout.js';
 import { KnowledgeDetail } from './ux-domain/KnowledgeDetail.js';
+import { KnowledgeList } from './ux-domain/KnowledgeList.js';
+import { Layout } from './ux-domain/Layout.js';
 
 const app = new Hono();
 // biome-ignore lint/complexity/useLiteralKeys: tsc の挙動と一貫性を保つため
@@ -34,12 +35,21 @@ app.get('/', (ctx) => {
   return ctx.html(<Layout />);
 });
 
+// UI: ナレッジ一覧ページ表示
 app.get('/knowledge', async (c) => {
   try {
     const knowledgeList = await FileBasedKnowledgeRepository.getAll();
-    return c.json(knowledgeList);
-  } catch (error) {
-    return c.json({ error: 'Failed to get knowledge list' }, 500);
+    return c.html(
+      <Layout>
+        <KnowledgeList knowledgeList={knowledgeList} />
+      </Layout>,
+    );
+  } catch (_error) {
+    return c.html(
+      <Layout>
+        <KnowledgeList error="ナレッジの取得に失敗しました" />
+      </Layout>,
+    );
   }
 });
 
@@ -48,7 +58,7 @@ app.get('/knowledge/:id', async (c) => {
     const id = c.req.param('id');
     const knowledge = await FileBasedKnowledgeRepository.getById(id);
     return c.json(knowledge);
-  } catch (error) {
+  } catch (_error) {
     return c.json({ error: 'Knowledge not found' }, 404);
   }
 });
@@ -59,7 +69,7 @@ app.get('/knowledge/:id/view', async (c) => {
     const id = c.req.param('id');
     const knowledge = await FileBasedKnowledgeRepository.getById(id);
     return c.html(<KnowledgeDetail knowledge={knowledge} />);
-  } catch (error) {
+  } catch (_error) {
     return c.html(<KnowledgeDetail />); // エラー時は空の状態
   }
 });
@@ -70,7 +80,7 @@ app.post('/knowledge', async (c) => {
     const knowledge = Knowledge.create(body.content, body.authorId);
     await FileBasedKnowledgeRepository.upsert(knowledge);
     return c.json(knowledge, 201);
-  } catch (error) {
+  } catch (_error) {
     return c.json({ error: 'Failed to create knowledge' }, 400);
   }
 });
@@ -83,7 +93,7 @@ app.put('/knowledge/:id', async (c) => {
     const updated = Knowledge.update(existing, body.content);
     await FileBasedKnowledgeRepository.upsert(updated);
     return c.json(updated);
-  } catch (error) {
+  } catch (_error) {
     return c.json({ error: 'Failed to update knowledge' }, 400);
   }
 });
@@ -93,7 +103,7 @@ app.delete('/knowledge/:id', async (c) => {
     const id = c.req.param('id');
     await FileBasedKnowledgeRepository.deleteById(id);
     return c.json({ success: true });
-  } catch (error) {
+  } catch (_error) {
     return c.json({ error: 'Failed to delete knowledge' }, 400);
   }
 });
