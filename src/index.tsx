@@ -8,6 +8,7 @@ import { FileBasedKnowledgeRepository } from './repositories/file-based-knowledg
 import { verifyIapJwt } from './services/jwt.service.js';
 import { KnowledgeDetail } from './ux-domain/KnowledgeDetail.js';
 import { KnowledgeList } from './ux-domain/KnowledgeList.js';
+import { KnowledgePost } from "./ux-domain/KnowledgePost.js";
 import { Layout } from './ux-domain/Layout.js';
 
 const app = new Hono();
@@ -61,6 +62,10 @@ app.get('/knowledge/:id', async (c) => {
   } catch (_error) {
     return c.json({ error: 'Knowledge not found' }, 404);
   }
+});
+
+app.get("/knowledge/new", (c) => {
+  return c.html(<KnowledgePost />);
 });
 
 // 詳細画面表示
