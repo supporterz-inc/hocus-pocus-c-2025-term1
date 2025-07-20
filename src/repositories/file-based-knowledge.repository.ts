@@ -45,7 +45,6 @@ async function writeSingleKnowledge(knowledge: Knowledge): Promise<void> {
 
 // ファイルベースのナレッジリポジトリの実装
 export const FileBasedKnowledgeRepository: KnowledgeRepository = {
-  
   // 指定されたIDの単一ナレッジを取得
   // readSingleKnowledgeを使用してファイルから読み込み
   // ナレッジが見つからない場合はErrorをスロー（明確なエラーメッセージ付き）
@@ -86,10 +85,8 @@ export const FileBasedKnowledgeRepository: KnowledgeRepository = {
     }
   },
 
-
   async upsert(knowledge: Knowledge): Promise<void> {
     await writeSingleKnowledge(knowledge);
-
   },
 
   async deleteById(id: string): Promise<void> {

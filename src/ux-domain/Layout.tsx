@@ -1,3 +1,5 @@
+import { CommonScripts } from './components/CommonScripts.js';
+
 export function Layout({ children }: { children?: React.ReactNode }) {
   return (
     <html lang="ja">
@@ -30,6 +32,9 @@ export function Layout({ children }: { children?: React.ReactNode }) {
 
         {/* メインコンテンツ */}
         <main class="w-[375px] mx-auto px-s py-m">{children || <div>コンテンツがありません</div>}</main>
+
+        {/* 共通のスクリプト */}
+        <CommonScripts />
       </body>
     </html>
   );

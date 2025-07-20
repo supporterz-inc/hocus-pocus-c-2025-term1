@@ -8,7 +8,8 @@ import { FileBasedKnowledgeRepository } from './repositories/file-based-knowledg
 import { verifyIapJwt } from './services/jwt.service.js';
 import { KnowledgeDetail } from './ux-domain/KnowledgeDetail.js';
 import { KnowledgeList } from './ux-domain/KnowledgeList.js';
-import { KnowledgePost } from "./ux-domain/KnowledgePost.js";
+import { KnowledgePost } from './ux-domain/KnowledgePost.js';
+import { KnowledgeEdit } from './ux-domain/KnowledgeEdit.js';
 import { Layout } from './ux-domain/Layout.js';
 
 const app = new Hono();
@@ -64,7 +65,7 @@ app.get('/knowledge/:id', async (c) => {
   }
 });
 
-app.get("/knowledge/new", (c) => {
+app.get('/knowledge/new', (c) => {
   return c.html(<KnowledgePost />);
 });
 
@@ -76,6 +77,24 @@ app.get('/knowledge/:id/view', async (c) => {
     return c.html(<KnowledgeDetail knowledge={knowledge} />);
   } catch (_error) {
     return c.html(<KnowledgeDetail />); // エラー時は空の状態
+  }
+});
+
+app.get('/knowledge/:id/edit', async (c) => {
+  try {
+    const id = c.req.param('id');
+    const knowledge = await FileBasedKnowledgeRepository.getById(id);
+    return c.html(
+      <Layout>
+        <KnowledgeEdit knowledge={knowledge} />
+      </Layout>
+    );
+  } catch (_error) {
+    return c.html(
+      <Layout>
+        <KnowledgeEdit />
+      </Layout>
+    );
   }
 });
 

@@ -1,4 +1,4 @@
-import { MarkdownRenderer } from './commpornents/MarkdownRenderer.js';
+import { MarkdownRenderer } from './components/MarkdownRenderer.js';
 import { Layout } from './Layout.js';
 
 interface KnowledgeDetailProps {
@@ -16,9 +16,7 @@ export function KnowledgeDetail({ knowledge }: KnowledgeDetailProps) {
     return (
       <Layout>
         <div class="text-center py-3xl">
-          <p class="text-16 text-gray-600">
-            ナレッジが見つかりません
-          </p>
+          <p class="text-16 text-gray-600">ナレッジが見つかりません</p>
           <a class="text-blue-500 text-14 mt-s inline-block" href="/knowledge">
             一覧に戻る
           </a>
@@ -68,17 +66,6 @@ export function KnowledgeDetail({ knowledge }: KnowledgeDetailProps) {
           </a>
         </div>
       </article>
-
-      {/* 削除用JavaScript */}
-      <script>{`
-            function deleteKnowledge(id) {
-                if (confirm('本当に削除しますか？')) {
-                    fetch('/knowledge/' + id, { method: 'DELETE' })
-                    .then(() => window.location.href = '/knowledge')
-                    .catch(err => alert('削除に失敗しました'));
-            }
-            }
-        `}</script>
     </Layout>
   );
 }
