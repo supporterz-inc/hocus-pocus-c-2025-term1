@@ -10,7 +10,8 @@
     "build": "npm run build:ts && npm run build:css",
     "start": "node ./target/index.js",
     "test": "vitest run",
-    "check": "biome check --write ./src"
+    "check": "biome check --write ./src", 
+    "check:ci": "biome ci ./src"
   },
   "type": "module",
   "version": "0.0.0",
