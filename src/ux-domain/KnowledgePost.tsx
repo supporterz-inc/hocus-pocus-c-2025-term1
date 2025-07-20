@@ -1,4 +1,4 @@
-import { Layout } from "./Layout.js";
+import { Layout } from './Layout.js';
 
 export function KnowledgePost() {
   // スクリプトの内容を別の変数として定義
@@ -58,25 +58,19 @@ export function KnowledgePost() {
         <h2 class="text-20 font-bold mb-m">新規投稿</h2>
         <form id="new-knowledge-form">
           <div class="mb-m">
-            <label
-              for="content"
-              class="block text-14 font-medium text-gray-700 mb-xs"
-            >
+            <label class="block text-14 font-medium text-gray-700 mb-xs" for="content">
               ナレッジ本文 (Markdown)
             </label>
             <textarea
+              class="w-full border border-gray-300 rounded-4 p-s text-14"
               id="content"
               name="content"
-              rows={10}
-              class="w-full border border-gray-300 rounded-4 p-s text-14"
               placeholder="Markdown 形式で入力してください"
+              rows={10}
             ></textarea>
           </div>
           <div class="flex justify-end">
-            <button
-              type="submit"
-              class="px-s py-2xs bg-blue-500 text-white text-14 rounded-4 hover:bg-blue-600"
-            >
+            <button class="px-s py-2xs bg-blue-500 text-white text-14 rounded-4 hover:bg-blue-600" type="submit">
               投稿する
             </button>
           </div>
