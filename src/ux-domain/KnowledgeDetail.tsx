@@ -16,7 +16,7 @@ export function KnowledgeDetail({ knowledge }: KnowledgeDetailProps) {
     return (
       <Layout>
         <div class="text-center py-3xl">
-          <p class="text-16 text-gray-600" p>
+          <p class="text-16 text-gray-600">
             ナレッジが見つかりません
           </p>
           <a class="text-blue-500 text-14 mt-s inline-block" href="/knowledge">
