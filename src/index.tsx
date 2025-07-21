@@ -41,8 +41,21 @@ app.use('*', async (ctx, next) => {
   await next();
 });
 
-app.get('/', (ctx) => {
-  return ctx.html(<Layout />);
+app.get('/', async (c) => {
+  try {
+    const knowledgeList = await FileBasedKnowledgeRepository.getAll();
+    return c.html(
+      <Layout>
+        <KnowledgeList knowledgeList={knowledgeList} />
+      </Layout>,
+    );
+  } catch (_error) {
+    return c.html(
+      <Layout>
+        <KnowledgeList error="ナレッジの取得に失敗しました" />
+      </Layout>,
+    );
+  }
 });
 
 // UI: ナレッジ一覧ページ表示
