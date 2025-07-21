@@ -5,7 +5,10 @@ import { HTTPException } from 'hono/http-exception';
 import { trimTrailingSlash } from 'hono/trailing-slash';
 import { Knowledge } from './core-domain/knowledge.model.js';
 import { FileBasedKnowledgeRepository } from './repositories/file-based-knowledge.repository.js';
+import { FileBasedThemeRepository } from './repositories/file-based-theme.repository.js';
+import { ContentValidatorService } from './services/content-validator.service.js';
 import { verifyIapJwt } from './services/jwt.service.js';
+import { ThemeAssignmentService } from './services/theme-assignment.service.js';
 import { KnowledgeDetail } from './ux-domain/KnowledgeDetail.js';
 import { KnowledgeEdit } from './ux-domain/KnowledgeEdit.js';
 import { KnowledgeList } from './ux-domain/KnowledgeList.js';
@@ -19,6 +22,11 @@ const isDebug = process.env['NODE_ENV'] === 'development';
 const iapAudience = process.env['IAP_AUDIENCE'];
 // biome-ignore lint/complexity/useLiteralKeys: tsc の挙動と一貫性を保つため
 const port = parseInt(process.env['PORT'] ?? '8080');
+
+// サービス初期化
+const themeRepository = new FileBasedThemeRepository();
+const themeAssignmentService = new ThemeAssignmentService(themeRepository);
+const contentValidator = new ContentValidatorService();
 
 app.use('/index.css', serveStatic({ path: 'target/index.css' }));
 app.use(trimTrailingSlash());
@@ -90,14 +98,37 @@ app.get('/knowledge/:id/view', async (c) => {
   }
 });
 
+// API: 今日のテーマ取得
+app.get('/api/users/:userId/today-theme', async (c) => {
+  try {
+    const userId = c.req.param('userId');
+    const theme = await themeAssignmentService.getTodayTheme(userId);
+    return c.json({ theme });
+  } catch (error) {
+    console.error('Error getting today theme:', error);
+    return c.json({ error: 'Failed to get today theme' }, 500);
+  }
+});
+
+// API: テーマ一覧取得
+app.get('/api/themes', async (c) => {
+  try {
+    const themes = await themeRepository.getActiveThemes();
+    return c.json({ themes });
+  } catch (error) {
+    console.error('Error getting themes:', error);
+    return c.json({ error: 'Failed to get themes' }, 500);
+  }
+});
+
 app.post('/api/knowledge', async (c) => {
   try {
     let content: string, authorId: string;
-    
+
     // Content-Typeに応じてデータを取得
     const contentType = c.req.header('content-type') || '';
     console.log('POST /api/knowledge - Content-Type:', contentType);
-    
+
     if (contentType.includes('application/json')) {
       // JSON形式の場合
       const body = await c.req.json();
@@ -111,24 +142,66 @@ app.post('/api/knowledge', async (c) => {
       authorId = formData.get('authorId') as string;
       console.log('Form data:', { content: content?.slice(0, 50), authorId });
     }
-    
+
     if (!content || !authorId) {
       return c.html(
         <Layout>
           <div class="bg-red-50 border border-red-200 rounded-md p-m">
             <p class="text-red-700">作成者IDと内容は必須です</p>
-            <a href="/knowledge/new" class="text-blue-500 hover:text-blue-700">戻る</a>
+            <a class="text-blue-500 hover:text-blue-700" href="/knowledge/new">
+              戻る
+            </a>
           </div>
-        </Layout>
+        </Layout>,
       );
     }
-    
+
+    // テーマ制約チェック
+    const todayTheme = await themeAssignmentService.getTodayTheme(authorId);
+    const validation = contentValidator.validateThemeContent(content, todayTheme.word);
+
+    if (!validation.isValid) {
+      const errorMessage = validation.reason || `今日のテーマ「${todayTheme.word}」を含む投稿をしてください`;
+
+      if (contentType.includes('application/json')) {
+        return c.json(
+          {
+            error: errorMessage,
+            theme: todayTheme,
+            validation,
+          },
+          400,
+        );
+      } else {
+        return c.html(
+          <Layout>
+            <div class="bg-red-50 border border-red-200 rounded-md p-m">
+              <p class="text-red-700">{errorMessage}</p>
+              <p class="text-sm text-gray-600 mt-2">
+                今日のテーマ: <strong>{todayTheme.word}</strong> ({todayTheme.category})
+              </p>
+              <a class="text-blue-500 hover:text-blue-700" href="/knowledge/new">
+                戻る
+              </a>
+            </div>
+          </Layout>,
+        );
+      }
+    }
+
     const knowledge = Knowledge.create(content, authorId);
     await FileBasedKnowledgeRepository.upsert(knowledge);
-    
+
     // HTMLフォームの場合はリダイレクト、JSONの場合はJSONレスポンス
     if (contentType.includes('application/json')) {
-      return c.json(knowledge, 201);
+      return c.json(
+        {
+          knowledge,
+          theme: todayTheme,
+          validation,
+        },
+        201,
+      );
     } else {
       return c.redirect('/knowledge');
     }
@@ -140,9 +213,11 @@ app.post('/api/knowledge', async (c) => {
         <Layout>
           <div class="bg-red-50 border border-red-200 rounded-md p-m">
             <p class="text-red-700">ナレッジの作成に失敗しました</p>
-            <a href="/knowledge/new" class="text-blue-500 hover:text-blue-700">戻る</a>
+            <a class="text-blue-500 hover:text-blue-700" href="/knowledge/new">
+              戻る
+            </a>
           </div>
-        </Layout>
+        </Layout>,
       );
     }
   }
@@ -167,47 +242,50 @@ app.post('/api/knowledge/:id', async (c) => {
     const formData = await c.req.formData();
     const method = formData.get('_method');
     const id = c.req.param('id');
-    
+
     if (method === 'PUT') {
       // 編集処理
       const content = formData.get('content') as string;
-      
+
       if (!content || !content.trim()) {
         return c.html(<KnowledgeEdit error="内容は必須です" />);
       }
-      
+
       const existing = await FileBasedKnowledgeRepository.getById(id);
       const updated = Knowledge.update(existing, content.trim());
       await FileBasedKnowledgeRepository.upsert(updated);
       return c.redirect(`/knowledge/${id}/view`);
-      
     } else if (method === 'DELETE') {
       // 削除処理
       await FileBasedKnowledgeRepository.deleteById(id);
       return c.redirect('/knowledge');
     }
-    
+
     return c.json({ error: 'Invalid method' }, 400);
   } catch (_error) {
     const method = (await c.req.formData()).get('_method');
-    
+
     if (method === 'PUT') {
       return c.html(
         <Layout>
           <div class="bg-red-50 border border-red-200 rounded-md p-m">
             <p class="text-red-700">更新に失敗しました</p>
-            <a href="/knowledge" class="text-blue-500 hover:text-blue-700">一覧に戻る</a>
+            <a class="text-blue-500 hover:text-blue-700" href="/knowledge">
+              一覧に戻る
+            </a>
           </div>
-        </Layout>
+        </Layout>,
       );
     } else {
       return c.html(
         <Layout>
           <div class="bg-red-50 border border-red-200 rounded-md p-m">
             <p class="text-red-700">削除に失敗しました</p>
-            <a href="/knowledge" class="text-blue-500 hover:text-blue-700">一覧に戻る</a>
+            <a class="text-blue-500 hover:text-blue-700" href="/knowledge">
+              一覧に戻る
+            </a>
           </div>
-        </Layout>
+        </Layout>,
       );
     }
   }
@@ -218,22 +296,24 @@ app.post('/api/knowledge/:id/delete', async (c) => {
   try {
     const formData = await c.req.formData();
     const method = formData.get('_method');
-    
+
     if (method === 'DELETE') {
       const id = c.req.param('id');
       await FileBasedKnowledgeRepository.deleteById(id);
       return c.redirect('/knowledge');
     }
-    
+
     return c.json({ error: 'Invalid method' }, 400);
   } catch (_error) {
     return c.html(
       <Layout>
         <div class="bg-red-50 border border-red-200 rounded-md p-m">
           <p class="text-red-700">削除に失敗しました</p>
-          <a href="/knowledge" class="text-blue-500 hover:text-blue-700">一覧に戻る</a>
+          <a class="text-blue-500 hover:text-blue-700" href="/knowledge">
+            一覧に戻る
+          </a>
         </div>
-      </Layout>
+      </Layout>,
     );
   }
 });
