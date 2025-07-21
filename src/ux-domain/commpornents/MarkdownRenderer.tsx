@@ -5,11 +5,11 @@ interface MarkdownRendererProps {
 export function MarkdownRenderer({ content }: MarkdownRendererProps) {
   // 安全にプレーンテキストとして表示
   const lines = content.split('\n');
-  
+
   return (
     <div class="prose max-w-none">
       {lines.map((line, index) => (
-        <div key={index} class="mb-2">
+        <div class="mb-2" key={`line-${index}-${line.slice(0, 10)}`}>
           {line.startsWith('# ') ? (
             <h1 class="text-24 font-bold mt-l mb-s text-gray-900">{line.slice(2)}</h1>
           ) : line.startsWith('## ') ? (

@@ -1,4 +1,4 @@
-export function Layout({ children }: { children?: any }) {
+export function Layout({ children }: { children?: import('hono/jsx').Child }) {
   return (
     <html lang="ja">
       <head>
@@ -14,7 +14,7 @@ export function Layout({ children }: { children?: any }) {
           <div class="w-[375px] mx-auto px-s py-s">
             <h1 class="text-20 font-bold text-gray-900">
               <a class="text-blue-500" href="/">
-                Hocus Pocus
+                Hocus Pocus パルプンテ
               </a>
             </h1>
             <nav class="mt-2xs">

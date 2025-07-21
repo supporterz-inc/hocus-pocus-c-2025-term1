@@ -112,12 +112,12 @@ export function KnowledgeList({ knowledgeList = [], error }: KnowledgeListProps)
               >
                 編集
               </a>
-              <form method="post" action={`/api/knowledge/${knowledge.id}`} style="display: inline;">
-                <input type="hidden" name="_method" value="DELETE" />
+              <form action={`/api/knowledge/${knowledge.id}`} method="post" style="display: inline;">
+                <input name="_method" type="hidden" value="DELETE" />
                 <button
-                  type="submit"
                   class="text-red-500 text-12 hover:text-red-700 transition-colors"
                   onclick="return confirm('このナレッジを削除してもよろしいですか？')"
+                  type="submit"
                 >
                   削除
                 </button>
